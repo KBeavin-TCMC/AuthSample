@@ -14,6 +14,7 @@ export default class App extends React.Component {
       signedIn: false,
       name: "",
       photoUrl: "",
+      accessToken: ""
     }
   }
 
@@ -23,11 +24,17 @@ export default class App extends React.Component {
       const result = await Google.logInAsync({
         androidClientId: config.OAUTH2_GOOGLE_ANDROID_KEY,
         scopes: ["profile", "email"],
+        
       });
   
       if (result.type === "success") {
         console.log(result);
-        authenticated = true;
+        this.setState({
+          signedIn: true,
+          name: result.user.name,
+          photoUrl: result.user.photoUrl,
+          accessToken: result.accessToken
+        })
   
         return result.accessToken;
       } else {
@@ -38,11 +45,18 @@ export default class App extends React.Component {
     }
   };
 
+  onLogOut = () => {
+    console.log("onLogOut")
+    this.setState({
+      signedIn: false
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
         {this.state.signedIn ? (
-          <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} />
+          <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} accessToken={this.state.accessToken} onLogOut={this.onLogOut}/>
         ) : (
           <LoginPage signIn={this.signIn} />
         )}
